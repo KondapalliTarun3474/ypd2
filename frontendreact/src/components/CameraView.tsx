@@ -15,6 +15,7 @@ export function CameraView({ onExit }: CameraViewProps) {
   const { result, sendFrame } = useWebSocket('ws://localhost:8765');
 
   const [currentAsanaIndex, setCurrentAsanaIndex] = useState(0);
+  const [completedAsanas, setCompletedAsanas] = useState<number[]>([]);
   const [correctPoseStartTime, setCorrectPoseStartTime] = useState<number | null>(null);
 
   useEffect(() => {
@@ -23,15 +24,15 @@ export function CameraView({ onExit }: CameraViewProps) {
         setCorrectPoseStartTime(Date.now());
       } else {
         const elapsedTime = Date.now() - correctPoseStartTime;
-        if (elapsedTime >= 2000) {
+        if (elapsedTime >= 3000) {
           handleNextAsana();
-          setCorrectPoseStartTime(null); // Reset for the next asana
+          setCorrectPoseStartTime(null);
         }
       }
     } else {
       setCorrectPoseStartTime(null);
     }
-  }, [result.status, isFullRoutine, correctPoseStartTime]);
+  }, [result.status, isFullRoutine, correctPoseStartTime, currentAsanaIndex]);
 
   const currentAsana = isFullRoutine
     ? selectedRoutine?.asanas[currentAsanaIndex]
@@ -43,9 +44,9 @@ export function CameraView({ onExit }: CameraViewProps) {
     const interval = setInterval(() => {
       const frameData = captureFrame();
       if (frameData) {
-        sendFrame(frameData, currentAsana.id);
+        sendFrame(`data:image/jpeg;base64,${frameData}`, currentAsana.id);
       }
-    }, 3000);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [isReady, currentAsana, sendFrame, captureFrame]);
@@ -53,10 +54,17 @@ export function CameraView({ onExit }: CameraViewProps) {
   const handleNextAsana = () => {
     if (!selectedRoutine || !isFullRoutine) return;
 
-    setCompletedAsanas([...completedAsanas, currentAsanaIndex]);
+    const newCompletedAsanas = [...completedAsanas, currentAsanaIndex];
+    setCompletedAsanas(newCompletedAsanas);
 
     if (currentAsanaIndex < selectedRoutine.asanas.length - 1) {
       setCurrentAsanaIndex(currentAsanaIndex + 1);
+      setCorrectPoseStartTime(null);
+    } else {
+      setTimeout(() => {
+        alert('Congratulations! Routine completed!');
+        onExit();
+      }, 1000);
     }
   };
 
@@ -153,9 +161,9 @@ export function CameraView({ onExit }: CameraViewProps) {
                 <p className="text-white text-lg font-bold mb-1">
                   {result.message}
                 </p>
-                {result.confidence && (
+                {result.confidence !== undefined && result.confidence > 0 && (
                   <p className="text-white/80 text-sm">
-                    Confidence: {Math.round(result.confidence * 100)}%
+                    Accuracy: {Math.round(result.confidence * 100)}%
                   </p>
                 )}
               </div>

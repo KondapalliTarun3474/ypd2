@@ -54,7 +54,8 @@ export function useCamera() {
 
     ctx.drawImage(videoRef.current, 0, 0);
 
-    return canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+    return dataUrl.split(',')[1];
   };
 
   const stopCamera = () => {

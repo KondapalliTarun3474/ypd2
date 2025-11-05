@@ -9,7 +9,11 @@ import ideal_landmarks_data
 import absolutely_ideal_landmarks_data
 import os
 
-Ideal_Poses = "D:\Sem_7\RK pe\Flexcellent\backend\ideal_poses"
+import sys
+from pathlib import Path
+
+script_dir = Path(__file__).parent
+Ideal_Poses = script_dir / "ideal_poses"
 ideal_landmarks = ideal_landmarks_data.ideal_landmarks
 absolutely_ideal_landmarks = absolutely_ideal_landmarks_data.absolutely_ideal_landmarks
 detector = pm.PoseDetector()
@@ -87,11 +91,11 @@ class PoseSimilarity():
         return wrong_joints
     
     def accuracy(self, asana, input_landmarks, thresh):
-        image_path = os.path.join("Ideal_Poses", f"{asana}.jpg")
+        image_path = str(Ideal_Poses / f"{asana}.jpg")
         ideal_asana = cv.imread(image_path)
         if ideal_asana is None:
             print(f"Error: Ideal pose image not found for {asana} at {image_path}")
-            return (False, {})
+            return 0.0
 
         ideal_image_frame = detector.findPose(ideal_asana)
         correct_landmarks = detector.findPosition(ideal_image_frame)
@@ -163,30 +167,28 @@ class PoseSimilarity():
         mini = float('inf')
         closest_landmarks = []
         flag = 0
-        
-        image_path = os.path.join("Ideal_Poses", f"{pose_name}.jpg")
+
+        image_path = str(Ideal_Poses / f"{pose_name}.jpg")
         ideal_asana = cv.imread(image_path)
         if ideal_asana is None:
             print(f"Error: Ideal pose image not found for {pose_name} at {image_path}")
-            return (False, {})
+            return (False, [])
 
         ideal_image_frame = detector.findPose(ideal_asana)
         correct_landmarks = detector.findPosition(ideal_image_frame)
         correct_landmarks = self.normalize_landmarks(correct_landmarks, reference_idx=0)
 
-        cv.imshow("Ideal landmarks", ideal_image_frame)
-
         # Compare full sets of landmarks, not individual ones
         dist = self.compare_poses(correct_landmarks, input_landmarks, euclidean_threshold)
 
         if dist < euclidean_threshold:
-            print("✅ You're doing it right.")
+            print("Pose is similar")
             flag = 1
             closest_landmarks = correct_landmarks
         else:
             mini = dist
             closest_landmarks = correct_landmarks
-        
+
         return (flag == 1, closest_landmarks)
 
         

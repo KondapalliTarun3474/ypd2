@@ -10,6 +10,7 @@ import pygame
 import gtts as gTTS
 import io
 import threading
+import time
 
 # Initialize pose detection modules
 detector = pm.PoseDetector()
@@ -68,7 +69,10 @@ async def handler(websocket):
 
             # Decode the base64 image
             try:
-                image_bytes = base64.b64decode(image_data.split(',')[1])
+                if ',' in image_data:
+                    image_bytes = base64.b64decode(image_data.split(',')[1])
+                else:
+                    image_bytes = base64.b64decode(image_data)
                 np_arr = np.frombuffer(image_bytes, np.uint8)
                 frame = cv.imdecode(np_arr, cv.IMREAD_COLOR)
             except (base64.binascii.Error, IndexError) as e:
@@ -93,26 +97,27 @@ async def handler(websocket):
 
             # Check for similarity and accuracy
             is_similar, correct_landmarks = pose_similarity.isSimilar(pose_name, normalized_landmarks, 0.3)
-            
+
             if is_similar:
                 accuracy = pose_similarity.accuracy(pose_name, normalized_landmarks, 30)
                 wrong_joints = pose_similarity.get_wrong_joints(pose_name, correct_landmarks, normalized_landmarks, 45)
 
                 if not wrong_joints:
-                    text = "You're doing it absolutely right."
+                    text = "Perfect pose!"
                     threading.Thread(target=text_to_speech, args=(text,)).start()
-                    await websocket.send(json.dumps({"data": 2, "confidence": accuracy}))
+                    await websocket.send(json.dumps({"data": 2, "confidence": accuracy / 100}))
                 else:
-                    text = []
-                    for i in wrong_joints:
-                        joint = wrong_joints[i][0]
-                        change = wrong_joints[i][1]
-                        text.append(change + "angle at" + " ".join((joint.split("_"))))
-                    for i in text:
-                        threading.Thread(target=text_to_speech, args=(i,)).start()
-                    await websocket.send(json.dumps({"data": 3, "confidence": accuracy}))
+                    feedback_parts = []
+                    for joint_key in wrong_joints:
+                        joint_name = wrong_joints[joint_key][0]
+                        change = wrong_joints[joint_key][1]
+                        feedback_parts.append(f"{change} angle at {joint_name.replace('_', ' ')}")
+
+                    feedback_text = ". ".join(feedback_parts[:2])
+                    threading.Thread(target=text_to_speech, args=(feedback_text,)).start()
+                    await websocket.send(json.dumps({"data": 3, "confidence": accuracy / 100}))
             else:
-                text = "Thoda galat."
+                text = "Adjust your position."
                 threading.Thread(target=text_to_speech, args=(text,)).start()
                 await websocket.send(json.dumps({"data": 1, "confidence": 0}))
 

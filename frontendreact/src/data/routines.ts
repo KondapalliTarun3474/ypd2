@@ -27,38 +27,38 @@ export const routines: Routine[] = [
       },
       {
         id: 4,
-        name: 'Ashwa Sanchalanasana',
-        sanskritName: 'Equestrian Pose (Right)',
+        name: 'Right Ashwa Sanchalanasana',
+        sanskritName: 'Equestrian Pose - Right Leg',
         image: 'https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg?auto=compress&cs=tinysrgb&w=800'
       },
       {
-        id: 5,
+        id: 6,
         name: 'Dandasana',
         sanskritName: 'Plank Pose',
         image: 'https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg?auto=compress&cs=tinysrgb&w=800'
       },
       {
-        id: 6,
+        id: 7,
         name: 'Ashtanga Namaskara',
         sanskritName: 'Eight Limbed Pose',
         image: 'https://images.pexels.com/photos/3822668/pexels-photo-3822668.jpeg?auto=compress&cs=tinysrgb&w=800'
       },
       {
-        id: 7,
+        id: 8,
         name: 'Bhujangasana',
         sanskritName: 'Cobra Pose',
         image: 'https://images.pexels.com/photos/3822906/pexels-photo-3822906.jpeg?auto=compress&cs=tinysrgb&w=800'
       },
       {
-        id: 8,
+        id: 9,
         name: 'Adho Mukha Svanasana',
         sanskritName: 'Downward Facing Dog',
         image: 'https://images.pexels.com/photos/3822356/pexels-photo-3822356.jpeg?auto=compress&cs=tinysrgb&w=800'
       },
       {
-        id: 9,
-        name: 'Ashwa Sanchalanasana',
-        sanskritName: 'Equestrian Pose (Left)',
+        id: 5,
+        name: 'Left Ashwa Sanchalanasana',
+        sanskritName: 'Equestrian Pose - Left Leg',
         image: 'https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg?auto=compress&cs=tinysrgb&w=800'
       }
     ]
